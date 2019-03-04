@@ -48,7 +48,7 @@ version of Visual Studio (VS):
 * Python 2.7 packages with Visual Studio 2008
 * Python 3.4 packages with VS 2010
 * Python 3.5 packages with VS 2015
-* Python 3.6 packages with VS 2015
+* Python 3.6 packages with VS 2017
 
 Using these versions of VS to build packages for each of these
 versions of Python is also the practice used for the official
@@ -80,7 +80,7 @@ compilers:
   Pack 1 Compiler Update for the Windows SDK 7.1
   <https://www.microsoft.com/en-us/download/details.aspx?id=4422>`_.
 
-* Visual Studio 2015 has a `full-featured, free Community edition
+* Visual Studio 2017 has a `full-featured, free Community edition
   <https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx>`_
   for academic research, open source projects and certain other
   use cases.
@@ -99,7 +99,7 @@ Windows versions
 -----------------
 
 You can use any recent version of Windows. These examples were
-built on Windows 8.1.
+built on Windows 8.1. <!--- why not Win 10? --->
 
 Other tools
 ------------
@@ -116,6 +116,18 @@ source such as http://gnuwin32.sourceforge.net/packages/bzip2.htm.
 Place this executable somewhere on PATH. One good option is to
 place it in your Miniconda/Anaconda install path in the
 ``Library/bin`` folder.
+
+<!--- this needs to be more explicit, e.g. --->
+Download bzip2
+Install and make note of the install path, e.g. `c:\Program Files (x86)\GnuWin32\bin`
+In Windows add bzip2 executable to the path
+```command
+set PATH=c:\Program Files (x86)\GnuWin32\bin;%PATH%
+```
+or in Linux or macOS:
+```bash
+export PATH=\path\to\bzip:$PATH
+```
 
 
 Developing a build strategy
@@ -194,7 +206,7 @@ Install Visual Studio
 If you have not already done so, install the appropriate
 version of Visual Studio:
 
-* For Python 3---Visual Studio 2015:
+* For Python 3---Visual Studio 2017:
 
   #. Choose Custom install.
 
@@ -216,6 +228,17 @@ Make a conda skeleton recipe
 
    The ``skeleton`` command installs into a newly created
    directory called ``sep``.
+
+<!--- this requires that setup.py & patch is installed if building this in an env --->
+```command
+conda install setuptools
+conda install m2-patch
+conda install numpy
+```
+<!--- this example fails on Windows 10, on either VS Community Edition 2015 and 2017 --->
+<!--- Windows 10, fails to find setup.py to execute if numpy is not installed. If numpy
+      is inatlled, script continues but is unable to run dlls regardless if conda is installed
+      for a single user or all users on the machine -->
 
 #. Go to the ``sep`` directory to view the files::
 
@@ -365,6 +388,9 @@ To build a GDAL package:
      Install Visual Studio 2008 Service Pack 1.
 
 2. Install Git.
+
+   <!--- This repeats the instructions above and m2-patch isn't needed for macOS or Linux --->
+
    Because the GDAL package sources are retrieved from GitHub
    for the build, you must install Git.
 
@@ -379,6 +405,33 @@ To build a GDAL package:
    ``conda install conda-build``
 
 5. Once conda build installs, build the gdal-feedstock.
+
+
+   <--- This example fails on boh Windows and macOS --->
+   <--- Windows error:
+        conda_build.exceptions.DependencyNeedsBuildingError: Unsatisfiable dependencies for platform win-64: {'poppler'} --->
+   <--- macOS error:
+        checking for x86_64-apple-darwin13.4.0-gcc... x86_64-apple-darwin13.4.0-clang
+checking whether the C compiler works... no
+configure: error: in /Users/sparafina/anaconda3/conda-bld/gdal-split_1551728038573/work':
+configure: error: C compiler cannot create executables
+See config.log for more details
+Traceback (most recent call last):
+  File "/Users/sparafina/anaconda3/bin/conda-build", line 11, in <module>
+    sys.exit(main())
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/cli/main_build.py", line 456, in main
+    execute(sys.argv[1:])
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/cli/main_build.py", line 447, in execute
+    verify=args.verify, variants=args.variants)
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/api.py", line 208, in build
+    notest=notest, need_source_download=need_source_download, variants=variants)
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/build.py", line 2311, in build_tree
+    notest=notest,
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/build.py", line 1477, in build
+    cwd=src_dir, stats=build_stats)
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/utils.py", line 374, in check_call_env
+    return _func_defaulting_env_to_os_environ('call', *popenargs, **kwargs)
+  File "/Users/sparafina/anaconda3/lib/python3.7/site-packages/conda_build/utils.py", line 354, in _func_defaulting_env_to_os_environ' --->
 
    ``conda build gdal-feedstock``
 
@@ -454,11 +507,11 @@ The file should look something like the following:
 
 Now you can build GDAL using conda build with the command
 
-``Conda build gdal-feedstock``
+``conda build gdal-feedstock``
 
 Or explicitly set the location of the conda build variant matrix
 
-``Conda build gdal-feedstock --variant-config-file conda_build_config.yaml``
+``conda build gdal-feedstock --variant-config-file conda_build_config.yaml``
 
 If you want to know more about build variants and conda_build_config.yaml,
 including how to specify a config file and what can go into it, take a look
